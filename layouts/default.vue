@@ -15,7 +15,7 @@
               <v-row no-gutters align="center" justify="center">
                 <nuxt-link to="/">
                   <v-row no-gutters align="center" justify="center">
-                    <h3 class="logo">Trello Clone</h3>
+                    <h4 class="text-h4">Trello Clone</h4>
                   </v-row>
                 </nuxt-link>
               </v-row>

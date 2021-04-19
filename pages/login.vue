@@ -26,8 +26,8 @@
           >
         </v-form>
       </v-card>
-      <v-snackbar v-model="snackbar" v-bind="snackbarOpt">
-        {{ snackbarText }}
+      <v-snackbar v-model="snackbarOpt.isVisible" v-bind="snackbarOpt">
+        {{ snackbarOpt.message }}
       </v-snackbar>
     </v-col>
   </v-row>
@@ -40,14 +40,16 @@ export default {
   data() {
     return {
       snackbarOpt: {
+        isVisible: false,
         absolute: true,
         top: true,
         right: true,
-        color: 'green',
-        timeout: 4000
+        color: 'red',
+        timeout: 4000,
+        message: ''
       },
       snackbar: false,
-      snackbarText: 'You have successfully signed in.',
+      snackbarText: '',
       auth: {
         key: '5651ec366c35346b8724dad0aedcf3d7',
         token:
@@ -59,21 +61,14 @@ export default {
     ...mapActions(['onAuthAction']),
     async login() {
       try {
-        console.log(this);
-        // const loginDataResponse = await fetch(
-        //   `https://api.trello.com/1//members/me?key=${this.auth.key}&token=${this.auth.token}`
-        // );
-        // const loginData = await loginDataResponse?.json();
         const loginData = await this.$trelloAPI.getMember(this.auth);
         console.log(loginData);
-        $nuxt.$router.push('/');
+        this.$router.push('/');
         this.onAuthAction(loginData);
-        this.snackbar = true;
       } catch (error) {
         console.error(error);
-        this.snackbarText = error?.message || err;
-        this.snackbar = true;
-        this.snackbarOpt.color = 'red';
+        this.snackbarOpt.message = error?.message || err;
+        this.snackbarOpt.isVisible = true;
       } finally {
       }
     }
