@@ -7,7 +7,7 @@ const actions = {
         path: '/login'
       });
     } else {
-      state.commit('SET_USER', user);
+      state.commit('SET_USER', user.json);
       this.$router.push({
         path: '/'
       });
@@ -17,6 +17,7 @@ const actions = {
 
 const mutations = {
   SET_USER(state, user) {
+    console.log(JSON.parse(JSON.stringify(user)));
     state.user = user;
   }
 };

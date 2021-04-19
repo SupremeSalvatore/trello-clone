@@ -59,11 +59,13 @@ export default {
     ...mapActions(['onAuthAction']),
     async login() {
       try {
-        const loginDataResponse = await fetch(
-          `https://api.trello.com/1//members/me?key=${this.auth.key}&token=${this.auth.token}`
-        );
-        const loginData = await loginDataResponse?.json();
-        console.log($nuxt.$router);
+        console.log(this);
+        // const loginDataResponse = await fetch(
+        //   `https://api.trello.com/1//members/me?key=${this.auth.key}&token=${this.auth.token}`
+        // );
+        // const loginData = await loginDataResponse?.json();
+        const loginData = await this.$trelloAPI.getMember(this.auth);
+        console.log(loginData);
         $nuxt.$router.push('/');
         this.onAuthAction(loginData);
         this.snackbar = true;
