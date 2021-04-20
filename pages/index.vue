@@ -68,7 +68,9 @@
 <script>
 export default {
   async asyncData({ $trelloAPI }) {
-    const boardsData = await $trelloAPI.makeRequest(`members/me/boards`);
+    const boardsData = await $trelloAPI.makeRequest({
+      path: `members/me/boards`
+    });
     console.log(JSON.parse(JSON.stringify(boardsData.json)));
     return { boards: boardsData.json };
   },
@@ -102,10 +104,13 @@ export default {
     async createBoard() {
       try {
         if (this.$refs.form.validate()) {
+          const requestObj = {
+            path: 'boards',
+            method: 'POST',
+            data: this.board
+          };
           const createdBoardData = await this.$trelloAPI.makeRequest(
-            'boards',
-            'POST',
-            this.board
+            requestObj
           );
           console.log(JSON.parse(JSON.stringify(createdBoardData)));
           this.boards.push(createdBoardData.json);

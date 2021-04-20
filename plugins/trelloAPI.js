@@ -7,29 +7,33 @@ export default ({ $config }, inject) => {
     makeRequest
   });
   async function getMember(auth) {
-    authString = `?key=${auth.key}&token=${auth.token}`;
+    authString = `key=${auth.key}&token=${auth.token}`;
     try {
       return unWrap(
-        await fetch(`https://api.trello.com/1/members/me${authString}`)
+        await fetch(`https://api.trello.com/1/members/me?${authString}`)
       );
     } catch (error) {
       return getErrorResponse(error);
     }
   }
-  async function makeRequest(path, method = 'GET', data) {
+  async function makeRequest({ path, params = {}, method = 'GET', data }) {
     try {
       const requestSettings = {
-        method,
-        headers: {
-          'Content-Type': 'application/json'
-        }
+        method
       };
       if (method === 'PUT' || method === 'POST') {
+        requestSettings.headers = {
+          'Content-Type': 'application/json'
+        };
         requestSettings.body = JSON.stringify(data);
       }
+      const paramsToString = Object.entries(params)
+        .map(([key, value]) => `${key}=${value}`)
+        .join('&');
+      console.log(paramsToString);
       return unWrap(
         await fetch(
-          `https://api.trello.com/1/${path}${authString}`,
+          `https://api.trello.com/1/${path}?${paramsToString}&${authString}`,
           requestSettings
         )
       );
