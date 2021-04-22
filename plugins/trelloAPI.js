@@ -9,6 +9,7 @@ export default ({ $config }, inject) => {
   async function getMember(auth) {
     authString = `key=${auth.key}&token=${auth.token}`;
     try {
+      console.log('beforeee');
       return unWrap(
         await fetch(`https://api.trello.com/1/members/me?${authString}`)
       );
@@ -21,7 +22,13 @@ export default ({ $config }, inject) => {
       const requestSettings = {
         method
       };
-      if (method === 'PUT' || method === 'POST') {
+      if (method === 'PUT') {
+        requestSettings.headers = {
+          'Content-Type': 'application/x-www-form-urlencoded'
+        };
+        // requestSettings.body = JSON.stringify(data);
+        requestSettings.body = new URLSearchParams(data);
+      } else if (method === 'POST') {
         requestSettings.headers = {
           'Content-Type': 'application/json'
         };

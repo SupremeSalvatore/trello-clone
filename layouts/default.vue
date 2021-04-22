@@ -22,7 +22,12 @@
             </v-col>
           </v-row>
         </v-container>
-        <v-navigation-drawer v-model="drawer" fixed left class="d-block">
+        <v-navigation-drawer
+          v-model="drawer"
+          fixed
+          left
+          class="d-block drawer1"
+        >
           <v-container fluid>
             <v-row no-gutters align="center" justify="space-between">
               <v-icon @click="drawer = false">mdi-close</v-icon>
@@ -63,7 +68,7 @@
 </template>
 
 <script>
-import { mapGetters, mapActions } from 'vuex';
+import { mapGetters } from 'vuex';
 export default {
   data() {
     return {
@@ -72,15 +77,15 @@ export default {
   },
   computed: {
     ...mapGetters(['getUser'])
-  },
-  updated() {
-    console.log('updated');
-  },
-  methods: {}
+  }
 };
 </script>
 
 <style lang="scss" scoped>
+.drawer1 {
+  transform: none !important;
+  transition-property: 'width';
+}
 .trello-user {
   font-size: 12px;
   margin-bottom: 0px !important;

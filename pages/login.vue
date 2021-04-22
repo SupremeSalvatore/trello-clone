@@ -5,23 +5,36 @@
         <v-card-title class="fancy-title align-center justify-center"
           >Trello Clone</v-card-title
         >
-        <v-form class="text-center pa-4 pt-0" @submit.prevent="login">
+        <v-form
+          v-model="formValid"
+          class="text-center pa-4 pt-0"
+          @submit.prevent="login"
+        >
           <v-text-field
-            label="key"
+            label="Key"
             name="key"
             prepend-icon="mdi-account"
             type="text"
+            :rules="[(v) => !!v || 'Key is required']"
+            required
             v-model="auth.key"
           ></v-text-field>
 
           <v-text-field
-            label="token"
+            label="Token"
             name="token"
             prepend-icon="mdi-lock"
             type="token"
+            :rules="[(v) => !!v || 'Token is required']"
+            required
             v-model="auth.token"
           ></v-text-field>
-          <v-btn class="login-button" type="submit" depressed large
+          <v-btn
+            :disabled="!formValid"
+            class="login-button"
+            type="submit"
+            depressed
+            large
             >Login</v-btn
           >
         </v-form>
@@ -39,6 +52,7 @@ export default {
   layout: 'login',
   data() {
     return {
+      formValid: false,
       snackbarOpt: {
         isVisible: false,
         absolute: true,
@@ -53,7 +67,8 @@ export default {
       auth: {
         key: '5651ec366c35346b8724dad0aedcf3d7',
         token:
-          'c14c27c6fd5a637370d326645b9b0dcd29513fbce471f5fccfc3bde26a8be034'
+          'c14c27c6fd5a637370d326645b9b0dcd29513fbce471f5fccfc3bde26a8be034',
+        token: 'asd'
       }
     };
   },
@@ -66,10 +81,8 @@ export default {
         this.$router.push('/');
         this.onAuthAction(loginData);
       } catch (error) {
-        console.error(error);
-        this.snackbarOpt.message = error?.message || err;
+        this.snackbarOpt.message = error?.statusText || error;
         this.snackbarOpt.isVisible = true;
-      } finally {
       }
     }
   }

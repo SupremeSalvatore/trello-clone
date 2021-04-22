@@ -1,13 +1,13 @@
 const actions = {
-  async onAuthAction(state, user) {
+  async onAuthAction(store, user) {
     if (!user) {
-      state.commit('SET_USER', null);
+      store.commit('SET_USER', null);
       //redirect from here
       this.$router.push({
         path: '/login'
       });
     } else {
-      state.commit('SET_USER', user.json);
+      store.commit('SET_USER', user.json);
       this.$router.push({
         path: '/'
       });
@@ -19,16 +19,27 @@ const mutations = {
   SET_USER(state, user) {
     console.log(JSON.parse(JSON.stringify(user)));
     state.user = user;
+  },
+  SET_BOARDS(state, boards) {
+    state.boards = boards;
+  },
+  ADD_BOARD(state, board) {
+    state.boards.push(board);
   }
 };
 
 const state = () => ({
-  user: null
+  user: null,
+  boards: []
 });
 
 const getters = {
   getUser(state) {
     return state.user;
+  },
+  getBoards(state) {
+    console.log('getting boards');
+    return state.boards;
   }
 };
 

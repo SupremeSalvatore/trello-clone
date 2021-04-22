@@ -35,9 +35,15 @@
       <v-btn small depressed @click="dialog = true">ADD BOARD</v-btn>
     </div>
     <div class="d-flex flex-wrap align-center justify-start">
-      <p v-if="boards.length === 0">You have no boards yet.</p>
+      <p v-if="getBoards.length === 0">You have no boards yet.</p>
       <v-row>
-        <v-col v-for="board in boards" :key="board.id" cols="12" md="6" lg="4">
+        <v-col
+          v-for="board in getBoards"
+          :key="board.id"
+          cols="12"
+          md="6"
+          lg="4"
+        >
           <v-card
             :color="board.prefs.background"
             @click="$router.push('/boards/' + board.id)"
@@ -66,13 +72,14 @@
 </template>
 
 <script>
+import { mapGetters, mapMutations } from 'vuex';
+
 export default {
-  async asyncData({ $trelloAPI }) {
+  async asyncData({ store, $trelloAPI }) {
     const boardsData = await $trelloAPI.makeRequest({
       path: `members/me/boards`
     });
-    console.log(JSON.parse(JSON.stringify(boardsData.json)));
-    return { boards: boardsData.json };
+    store.commit('SET_BOARDS', boardsData.json);
   },
   data() {
     return {
@@ -99,8 +106,11 @@ export default {
       snackbarText: 'No error message'
     };
   },
-  created() {},
+  computed: {
+    ...mapGetters(['getBoards'])
+  },
   methods: {
+    ...mapMutations(['ADD_BOARD']),
     async createBoard() {
       try {
         if (this.$refs.form.validate()) {
@@ -112,8 +122,7 @@ export default {
           const createdBoardData = await this.$trelloAPI.makeRequest(
             requestObj
           );
-          console.log(JSON.parse(JSON.stringify(createdBoardData)));
-          this.boards.push(createdBoardData.json);
+          this.ADD_BOARD(createdBoardData.json);
           this.dialog = false;
         }
       } catch (err) {

@@ -4,53 +4,97 @@
       class="d-flex flex-column board"
       :style="board.color ? `background-color:${board.color}` : ''"
     >
-      <h1>
-        {{ board.name }}
-        <v-btn fab x-small color="red" @click="deleteBoard()" class="ml-1">
+      <div class="d-flex align-center">
+        <h1>
+          {{ board.name }}
+        </h1>
+        <v-btn fab x-small color="red" @click="deleteBoard()" class="ml-4">
           <v-icon>mdi-delete-outline</v-icon>
         </v-btn>
-      </h1>
-      <small>{{ board.description }}</small>
+        <small>{{ board.description }}</small>
+      </div>
+
       <div class="d-flex flex-row pr-6 pt-3">
-        <div
-          v-for="list in board.lists"
-          class="d-flex flex-column pt-3 mr-6 list pa-2"
-          :key="list.id"
+        <draggable
+          class="d-flex"
+          group="lists"
+          v-model="board.lists"
+          @start="listDrag = true"
+          @end="updateListPosition"
         >
-          <div class="d-flex flex-row justify-space-between mb-2">
-            <h4>{{ list.name }}</h4>
-            <v-btn
-              fab
-              x-small
-              color="red"
-              @click="archiveList(list.id)"
-              class="ml-1"
+          <transition-group class="d-flex">
+            <div
+              v-for="(list, listIndex) in board.lists"
+              class="d-flex flex-column pt-3 mr-6 list pa-2"
+              :key="list.id"
+              :id="list.id"
             >
-              <v-icon>mdi-delete-outline</v-icon>
-            </v-btn>
-          </div>
+              <div class="d-flex flex-row justify-space-between mb-2">
+                <h4 v-if="!list.edit" @click="list.edit = !list.edit">
+                  {{ list.name }}
+                </h4>
+                <v-text-field
+                  class="mt-0 pt-0"
+                  type="text"
+                  ref="input"
+                  v-model="list.name"
+                  v-else
+                  @blur="updateList(list)"
+                  @keyup.enter="updateList(list)"
+                />
+                <v-spacer></v-spacer>
+                <v-btn
+                  class="mr-1"
+                  fab
+                  x-small
+                  color="info"
+                  @click="moveList(list, listIndex)"
+                >
+                  <v-icon>mdi-folder-move</v-icon>
+                </v-btn>
+                <v-btn
+                  class="mr-1"
+                  fab
+                  x-small
+                  color="purple"
+                  @click="copyList(list, listIndex)"
+                >
+                  <v-icon>mdi-content-copy</v-icon>
+                </v-btn>
+                <v-btn fab x-small color="red" @click="archiveList(list.id)">
+                  <v-icon>mdi-delete-outline</v-icon>
+                </v-btn>
+              </div>
 
-          <!--display cards-->
-          <v-card
-            v-for="card in list.cards"
-            class="mb-2"
-            @click="editCard(card)"
-            :key="card.id"
-          >
-            <v-card-text> {{ card.name }} </v-card-text>
-            <v-card-text> {{ card.desc }} </v-card-text>
-          </v-card>
-
-          <v-btn
-            depressed
-            @click="
-              dialogCard = true;
-              newCard.idList = list.id;
-            "
-            class="mt-auto"
-            >Add card</v-btn
-          >
-        </div>
+              <!--display cards-->
+              <draggable
+                group="cards"
+                v-model="list.cards"
+                @start="cardDrag = true"
+                @end="updateCardPosition"
+              >
+                <v-card
+                  v-for="card in list.cards"
+                  class="mb-2"
+                  @click="editCard(card)"
+                  :key="card.id"
+                >
+                  <v-card-text> {{ card.name }} </v-card-text>
+                  <v-card-text> {{ card.desc }} </v-card-text>
+                </v-card>
+              </draggable>
+              <v-btn
+                depressed
+                @click="
+                  dialogCard = true;
+                  newCard.idList = list.id;
+                "
+                class="mt-auto"
+                >Add card</v-btn
+              >
+            </div>
+          </transition-group>
+        </draggable>
         <v-dialog v-model="dialogCard" persistent max-width="600px">
           <v-card elevation="0">
             <v-card-title>
@@ -102,10 +146,10 @@
           </v-card>
         </v-dialog>
         <div class="d-flex flex-row">
-          <v-btn depressed @click="dialog = true" class="create-list"
+          <v-btn depressed @click="listDialog = true" class="create-list"
             >Create new list</v-btn
           >
-          <v-dialog v-model="dialog" persistent max-width="600px">
+          <v-dialog v-model="listDialog" persistent max-width="360px">
             <v-card elevation="0">
               <v-card-title>
                 <span class="headline">List name</span>
@@ -116,7 +160,7 @@
                     <v-col cols="12">
                       <v-text-field
                         label="Stuff to do"
-                        v-model="list.name"
+                        v-model="newList.name"
                         required
                       ></v-text-field>
                     </v-col>
@@ -125,7 +169,7 @@
               </v-card-text>
               <v-card-actions>
                 <v-spacer></v-spacer>
-                <v-btn color="blue darken-1" text @click="dialog = false">
+                <v-btn color="blue darken-1" text @click="listDialog = false">
                   Close
                 </v-btn>
                 <v-btn color="blue darken-1" text @click="createList()">
@@ -180,11 +224,19 @@
 </template>
 
 <script>
+import draggable from 'vuedraggable';
+import { mapGetters } from 'vuex';
+console.log(draggable);
 export default {
+  components: {
+    draggable
+  },
   data() {
     return {
-      list: {
-        name: ''
+      listDrag: false,
+      newList: {
+        name: '',
+        pos: ''
       },
       newCard: {
         idList: '',
@@ -193,12 +245,15 @@ export default {
         desc: ''
       },
       currentCard: {},
-
-      dialog: false,
+      cardDrag: false,
+      listDialog: false,
       valid: false,
       dialogCard: false,
       dialogEditCard: false
     };
+  },
+  computed: {
+    ...mapGetters(['getBoards'])
   },
   async asyncData({ $trelloAPI, params }) {
     const requestObj = {
@@ -210,23 +265,63 @@ export default {
     };
     const boardData = await $trelloAPI.makeRequest(requestObj);
     boardData.json.lists = boardData.json.lists.map((list) => {
+      list.edit = false;
       list.cards = boardData.json.cards.reduce((accCardArr, card) => {
         if (card.idList === list.id) {
           accCardArr.push(card);
         }
         return accCardArr;
       }, []);
-      console.log(JSON.parse(JSON.stringify(list.cards)));
       return list;
     });
     return { board: boardData.json };
   },
   created() {
     console.log(JSON.parse(JSON.stringify(this.board)));
+    console.log(JSON.parse(JSON.stringify(this.getBoards)));
   },
   methods: {
+    async updateList(list) {
+      const requestObj = {
+        path: `lists/${list.id}`,
+        method: 'PUT',
+        data: {
+          name: list.name
+        }
+      };
+      await this.$trelloAPI.makeRequest(requestObj);
+      list.edit = false;
+    },
+    async updateListPosition(item) {
+      const beforeItem = this.board.lists[item.newIndex - 1];
+      const afterItem = this.board.lists[item.newIndex + 1];
+      const position = this.calculateListPosition(beforeItem, afterItem);
+      const requestObj = {
+        path: `lists/${item.item.id}`,
+        method: 'PUT',
+        data: {
+          pos: position
+        }
+      };
+      await this.$trelloAPI.makeRequest(requestObj);
+      this.board.lists[item.newIndex].pos = position;
+      this.listDrag = false;
+    },
+    calculateListPosition(beforeItem, afterItem) {
+      if (beforeItem && afterItem) {
+        return (beforeItem.pos + afterItem.pos) / 2;
+      } else if (!beforeItem) {
+        return afterItem.pos / 2;
+      }
+      return beforeItem.pos * 2;
+    },
+    updateCardPosition(item) {
+      console.log('update card position');
+      this.cardDrag = false;
+    },
     async createList() {
       console.log(JSON.parse(JSON.stringify(this.list)));
+
       const requestObj = {
         path: `boards/${this.board.id}/lists`,
         method: 'POST',
@@ -239,7 +334,21 @@ export default {
     },
 
     async updateCardList(newlistId) {},
-
+    async copyList(list, index) {
+      const position = this.board.lists[index + 1]
+        ? (list.pos + this.board.lists[index + 1]) / 2
+        : list.pos * 2;
+      const requestObj = {
+        path: `lists`,
+        method: 'POST',
+        data: { ...list, pos: position, idListSource: list.id }
+      };
+      const listData = await this.$trelloAPI.makeRequest(requestObj);
+      this.board.lists.splice(index, 0, {
+        ...list,
+        ...listData.json
+      });
+    },
     async archiveList(listId) {
       const requestObj = {
         path: `lists/${listId}/closed`,

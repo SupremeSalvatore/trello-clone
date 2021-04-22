@@ -1,4 +1,5 @@
-export async function unWrap(response) {
+export const unWrap = async (response) => {
+  console.log(response);
   const json = await response.json();
   const { ok, status, statusText } = response;
   return {
@@ -7,13 +8,15 @@ export async function unWrap(response) {
     status,
     statusText
   };
-}
+};
 
-export function getErrorResponse(error) {
+export const getErrorResponse = (error) => {
+  console.log('in getError');
+  console.log(error);
   return {
     ok: false,
     status: 500,
-    statusText: error.message,
+    statusText: error?.message || error,
     json: {}
   };
-}
+};

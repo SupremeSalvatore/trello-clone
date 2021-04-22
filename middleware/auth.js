@@ -15,7 +15,7 @@ export default function({ store, route, redirect }) {
       return redirect('/login');
     }
   } else if (route.path === '/login') {
-    console.log(store.state.user);
+    // console.log(store.state.user);
     if (!store.state.user) {
       //leave them on the sign in page
     } else {
