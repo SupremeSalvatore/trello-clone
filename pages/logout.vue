@@ -7,7 +7,6 @@ import { mapActions } from 'vuex';
 
 export default {
   created() {
-    console.log('created');
     this.onAuthAction(null);
   },
   methods: {

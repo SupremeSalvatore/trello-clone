@@ -1,4 +1,4 @@
-export default function({ store, route, redirect }) {
+export default function({ app, store, route, redirect }) {
   // if (!store.state.user) {
   //   if (route.path === '/logout') {
   //     return redirect('/logout');

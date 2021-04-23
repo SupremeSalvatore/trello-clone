@@ -1,10 +1,14 @@
 <template>
   <v-row align="center" justify="center">
-    <v-col cols="12" sm="8" md="6" align="center">
+    <v-col cols="12" sm="8" md="8" align="center">
       <v-card class="elevation-4 text-left">
         <v-card-title class="fancy-title align-center justify-center"
           >Trello Clone</v-card-title
         >
+        <v-card-subtitle>
+          Get your key and token on this
+          <a href="https://trello.com/app-key" target="_blank">link.</a>
+        </v-card-subtitle>
         <v-form
           v-model="formValid"
           class="text-center pa-4 pt-0"
@@ -67,8 +71,7 @@ export default {
       auth: {
         key: '5651ec366c35346b8724dad0aedcf3d7',
         token:
-          'c14c27c6fd5a637370d326645b9b0dcd29513fbce471f5fccfc3bde26a8be034',
-        token: 'asd'
+          'c14c27c6fd5a637370d326645b9b0dcd29513fbce471f5fccfc3bde26a8be034'
       }
     };
   },

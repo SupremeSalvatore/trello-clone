@@ -38,7 +38,6 @@ const getters = {
     return state.user;
   },
   getBoards(state) {
-    console.log('getting boards');
     return state.boards;
   }
 };

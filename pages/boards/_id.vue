@@ -1,13 +1,26 @@
 <template>
-  <v-container>
-    <div
-      class="d-flex flex-column board"
-      :style="board.color ? `background-color:${board.color}` : ''"
-    >
+  <v-container
+    fluid
+    :style="
+      board.prefs.backgroundColor
+        ? `background-color:${board.prefs.backgroundColor}`
+        : ''
+    "
+  >
+    <div class="d-flex flex-column board">
       <div class="d-flex align-center">
-        <h1>
+        <h1 v-if="!board.edit" @click="board.edit = !board.edit">
           {{ board.name }}
         </h1>
+        <v-text-field
+          v-else
+          class="mt-0 pt-0 shrink"
+          type="text"
+          :value="board.name"
+          @blur="updateBoard($event)"
+          @keyup.esc="updateBoard($event)"
+          @keyup.enter="updateBoard($event)"
+        />
         <v-btn fab x-small color="red" @click="deleteBoard()" class="ml-4">
           <v-icon>mdi-delete-outline</v-icon>
         </v-btn>
@@ -34,13 +47,14 @@
                   {{ list.name }}
                 </h4>
                 <v-text-field
+                  v-else
                   class="mt-0 pt-0"
                   type="text"
-                  ref="input"
-                  v-model="list.name"
-                  v-else
-                  @blur="updateList(list)"
-                  @keyup.enter="updateList(list)"
+                  ref="boardName"
+                  :value="list.name"
+                  @blur="updateList($event, list)"
+                  @keyup.esc="updateList($event, list)"
+                  @keyup.enter="updateList($event, list)"
                 />
                 <v-spacer></v-spacer>
                 <v-btn
@@ -75,7 +89,7 @@
               >
                 <v-card
                   v-for="card in list.cards"
-                  class="mb-2"
+                  class="card mb-2"
                   @click="editCard(card)"
                   :key="card.id"
                 >
@@ -89,7 +103,7 @@
                   dialogCard = true;
                   newCard.idList = list.id;
                 "
-                class="mt-auto"
+                class="create-card mt-1"
                 >Add card</v-btn
               >
             </div>
@@ -226,7 +240,8 @@
 <script>
 import draggable from 'vuedraggable';
 import { mapGetters } from 'vuex';
-console.log(draggable);
+import { calculateListPos } from '~/utils/calculatePos.js';
+
 export default {
   components: {
     draggable
@@ -274,28 +289,47 @@ export default {
       }, []);
       return list;
     });
-    return { board: boardData.json };
+    return { board: { ...boardData.json, edit: false } };
   },
   created() {
     console.log(JSON.parse(JSON.stringify(this.board)));
     console.log(JSON.parse(JSON.stringify(this.getBoards)));
   },
   methods: {
-    async updateList(list) {
-      const requestObj = {
-        path: `lists/${list.id}`,
-        method: 'PUT',
-        data: {
-          name: list.name
-        }
-      };
-      await this.$trelloAPI.makeRequest(requestObj);
+    async updateBoard($event) {
+      const boardName = $event.target.value.trim();
+      if (boardName && boardName !== this.board.name) {
+        this.board.name = boardName;
+        const requestObj = {
+          path: `boards/${this.board.id}`,
+          method: 'PUT',
+          data: {
+            name: this.board.name
+          }
+        };
+        await this.$trelloAPI.makeRequest(requestObj);
+      }
+      this.board.edit = false;
+    },
+    async updateList($event, list) {
+      const listName = $event.target.value.trim();
+      if (listName && listName !== list.name) {
+        list.name = $event.target.value.trim();
+        const requestObj = {
+          path: `lists/${list.id}`,
+          method: 'PUT',
+          data: {
+            name: list.name
+          }
+        };
+        await this.$trelloAPI.makeRequest(requestObj);
+      }
       list.edit = false;
     },
     async updateListPosition(item) {
       const beforeItem = this.board.lists[item.newIndex - 1];
       const afterItem = this.board.lists[item.newIndex + 1];
-      const position = this.calculateListPosition(beforeItem, afterItem);
+      const position = calculateListPos(beforeItem, afterItem);
       const requestObj = {
         path: `lists/${item.item.id}`,
         method: 'PUT',
@@ -307,41 +341,32 @@ export default {
       this.board.lists[item.newIndex].pos = position;
       this.listDrag = false;
     },
-    calculateListPosition(beforeItem, afterItem) {
-      if (beforeItem && afterItem) {
-        return (beforeItem.pos + afterItem.pos) / 2;
-      } else if (!beforeItem) {
-        return afterItem.pos / 2;
-      }
-      return beforeItem.pos * 2;
-    },
-    updateCardPosition(item) {
-      console.log('update card position');
-      this.cardDrag = false;
-    },
-    async createList() {
-      console.log(JSON.parse(JSON.stringify(this.list)));
 
+    async createList() {
+      const [lastListItem] = this.board.lists.slice(-1);
+      this.newList.pos = calculateListPos(lastListItem);
       const requestObj = {
         path: `boards/${this.board.id}/lists`,
         method: 'POST',
-        data: this.list
+        data: this.newList
       };
       const listData = await this.$trelloAPI.makeRequest(requestObj);
       console.log(JSON.parse(JSON.stringify(listData.json)));
       this.board.lists.push(listData.json);
-      this.dialog = false;
+      this.listDialog = false;
+      this.newList = {
+        name: '',
+        pos: ''
+      };
     },
-
-    async updateCardList(newlistId) {},
     async copyList(list, index) {
-      const position = this.board.lists[index + 1]
-        ? (list.pos + this.board.lists[index + 1]) / 2
-        : list.pos * 2;
+      const afterItem = this.board.lists[index + 1];
+      const position = calculateListPos(list, afterItem);
+      const { id, name, idBoard } = list;
       const requestObj = {
         path: `lists`,
         method: 'POST',
-        data: { ...list, pos: position, idListSource: list.id }
+        data: { name, pos: position, idListSource: id, idBoard }
       };
       const listData = await this.$trelloAPI.makeRequest(requestObj);
       this.board.lists.splice(index, 0, {
@@ -376,6 +401,11 @@ export default {
       this.newCard.desc = '';
       this.dialogCard = false;
     },
+    updateCardPosition(item) {
+      console.log('update card position');
+      this.cardDrag = false;
+    },
+    async updateCardList(newlistId) {},
     editCard(card) {
       this.dialogEditCard = true;
       this.currentCard = card;
@@ -410,8 +440,7 @@ export default {
         method: 'DELETE'
       });
       this.$router.push('/');
-    },
-    async updateBoard() {}
+    }
   }
 };
 </script>
@@ -430,10 +459,15 @@ export default {
     height: fit-content;
   }
   .v-card__text {
+    color: white;
     padding: 0px 8px;
   }
   .create-list {
     background-color: rgb(228 228 228 / 35%);
+  }
+  .card,
+  .create-card {
+    background-color: rgb(228 228 228 / 40%);
   }
   a {
     text-decoration: none;

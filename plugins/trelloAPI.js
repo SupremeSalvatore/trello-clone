@@ -9,7 +9,6 @@ export default ({ $config }, inject) => {
   async function getMember(auth) {
     authString = `key=${auth.key}&token=${auth.token}`;
     try {
-      console.log('beforeee');
       return unWrap(
         await fetch(`https://api.trello.com/1/members/me?${authString}`)
       );
@@ -37,7 +36,6 @@ export default ({ $config }, inject) => {
       const paramsToString = Object.entries(params)
         .map(([key, value]) => `${key}=${value}`)
         .join('&');
-      console.log(paramsToString);
       return unWrap(
         await fetch(
           `https://api.trello.com/1/${path}?${paramsToString}&${authString}`,

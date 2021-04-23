@@ -1,6 +1,6 @@
 <template>
   <v-container>
-    <v-dialog v-model="dialog" max-width="355" persistent>
+    <v-dialog v-model="dialog" max-width="355px" persistent>
       <v-container class="d-block">
         <v-row no-gutters align="center" justify="space-between">
           <v-row no-gutters>
@@ -8,7 +8,7 @@
           </v-row>
           <v-icon @click="dialog = false">mdi-close</v-icon>
         </v-row>
-        <v-form ref="form" v-model="valid">
+        <v-form ref="form" v-model="valid" @submit.prevent="createBoard">
           <div class="d-flex flex-column">
             <v-text-field
               label="Board title"
@@ -16,6 +16,7 @@
               type="text"
               :rules="[(v) => !!v || 'Board title is required']"
               required
+              autocomplete="off"
               v-model="board.name"
             ></v-text-field>
             <v-select
@@ -23,9 +24,9 @@
               :items="boardColors"
               label="Standard"
             ></v-select>
-            <v-btn :disabled="!valid" color="primary" @click="createBoard"
-              >Submit</v-btn
-            >
+            <v-btn type="submit" :disabled="!valid" color="primary">
+              Submit
+            </v-btn>
           </div>
         </v-form>
       </v-container>
@@ -35,7 +36,7 @@
       <v-btn small depressed @click="dialog = true">ADD BOARD</v-btn>
     </div>
     <div class="d-flex flex-wrap align-center justify-start">
-      <p v-if="getBoards.length === 0">You have no boards yet.</p>
+      <p v-if="!getBoards.length">You have no boards yet.</p>
       <v-row>
         <v-col
           v-for="board in getBoards"
@@ -50,7 +51,9 @@
             class="tello-board-tile"
           >
             <v-card-title>
-              {{ board.name }}
+              {{ board.name }} <v-spacer></v-spacer>
+              <v-icon v-if="board.starred" color="yellow">mdi-star</v-icon>
+              <v-icon v-else color="yellow">mdi-star-outline</v-icon>
             </v-card-title>
             <v-card-subtitle class="text-truncate">
               {{ board.desc }}
@@ -59,15 +62,6 @@
         </v-col>
       </v-row>
     </div>
-    <v-snackbar
-      :timeout="3000"
-      v-model="snackbar"
-      absolute
-      bottom
-      color="primary"
-    >
-      {{ snackbarText }}
-    </v-snackbar>
   </v-container>
 </template>
 
@@ -79,6 +73,7 @@ export default {
     const boardsData = await $trelloAPI.makeRequest({
       path: `members/me/boards`
     });
+    console.log(JSON.parse(JSON.stringify(boardsData.json)));
     store.commit('SET_BOARDS', boardsData.json);
   },
   data() {
@@ -101,9 +96,7 @@ export default {
         desc: 'Your Description',
         name: 'My First API board',
         prefs_background: 'orange'
-      },
-      snackbar: false,
-      snackbarText: 'No error message'
+      }
     };
   },
   computed: {
