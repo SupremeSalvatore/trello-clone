@@ -56,6 +56,9 @@
 import { mapActions } from 'vuex';
 export default {
   layout: 'login',
+  asyncData({ env }) {
+    return { auth: { key: env.TRELLO_KEY, token: env.TRELLO_TOKEN } };
+  },
   data() {
     return {
       formValid: false,
@@ -69,12 +72,11 @@ export default {
         message: ''
       },
       snackbar: false,
-      snackbarText: '',
-      auth: {
-        key: '5651ec366c35346b8724dad0aedcf3d7',
-        token:
-          'c14c27c6fd5a637370d326645b9b0dcd29513fbce471f5fccfc3bde26a8be034'
-      }
+      snackbarText: ''
+      // auth: {
+      //   key: this.TRELLO_KEY,
+      //   token: this.TRELLO_TOKEN
+      // }
     };
   },
   methods: {
@@ -82,7 +84,6 @@ export default {
     async login() {
       try {
         const loginData = await this.$trelloAPI.getMember(this.auth);
-        console.log(loginData);
         this.$router.push('/');
         this.onAuthAction(loginData);
       } catch (error) {

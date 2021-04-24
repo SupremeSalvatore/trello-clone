@@ -44,9 +44,12 @@ import { mapGetters } from 'vuex';
 export default {
   async asyncData({ store, $trelloAPI }) {
     const boardsData = await $trelloAPI.makeRequest({
-      path: `members/me/boards`
+      path: `members/me/boards`,
+      params: {
+        lists: 'open',
+        cards: 'all'
+      }
     });
-    console.log(JSON.parse(JSON.stringify(boardsData.json)));
     store.commit('SET_BOARDS', boardsData.json);
   },
   data() {

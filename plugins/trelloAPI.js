@@ -1,6 +1,4 @@
-import { unWrap, getErrorResponse } from '~/utils/fetchUtils';
-
-export default ({ $config }, inject) => {
+export default ({ $config, env }, inject) => {
   let authString = '';
   inject('trelloAPI', {
     getMember,
@@ -9,11 +7,23 @@ export default ({ $config }, inject) => {
   async function getMember(auth) {
     authString = `key=${auth.key}&token=${auth.token}`;
     try {
-      return unWrap(
-        await fetch(`https://api.trello.com/1/members/me?${authString}`)
+      const response = await fetch(
+        `${env.TRELLO_URL}/members/me?${authString}`
       );
+      if (!response.ok) {
+        throw Error(
+          response.statusText ||
+            'Credentials are invalid, please enter valid key and token.'
+        );
+      }
+      const parsedResponse = await response.json();
+      return {
+        ...response,
+        json: parsedResponse
+      };
     } catch (error) {
-      return getErrorResponse(error);
+      console.error(error);
+      throw error;
     }
   }
   async function makeRequest({ path, params = {}, method = 'GET', data }) {
@@ -36,14 +46,21 @@ export default ({ $config }, inject) => {
       const paramsToString = Object.entries(params)
         .map(([key, value]) => `${key}=${value}`)
         .join('&');
-      return unWrap(
-        await fetch(
-          `https://api.trello.com/1/${path}?${paramsToString}&${authString}`,
-          requestSettings
-        )
+      const response = await fetch(
+        `${env.TRELLO_URL}/${path}?${paramsToString}&${authString}`,
+        requestSettings
       );
+      if (!response.ok) {
+        throw Error(response.statusText);
+      }
+      const parsedResponse = await response.json();
+      return {
+        ...response,
+        json: parsedResponse
+      };
     } catch (error) {
-      return getErrorResponse(error);
+      console.error(error);
+      throw error;
     }
   }
 };

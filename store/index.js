@@ -17,7 +17,6 @@ const actions = {
 
 const mutations = {
   SET_USER(state, user) {
-    console.log(JSON.parse(JSON.stringify(user)));
     state.user = user;
   },
   SET_BOARDS(state, boards) {

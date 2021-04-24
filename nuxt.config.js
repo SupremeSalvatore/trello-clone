@@ -6,8 +6,8 @@ export default {
 
   // Global page headers: https://go.nuxtjs.dev/config-head
   head: {
-    titleTemplate: '%s - trello-clone',
-    title: 'trello-clone',
+    titleTemplate: '%s - Trello',
+    title: 'Trello Clone',
     htmlAttrs: {
       lang: 'en'
     },
@@ -59,7 +59,11 @@ export default {
       }
     }
   },
-
+  env: {
+    TRELLO_KEY: process.env.TRELLO_API_KEY || '',
+    TRELLO_TOKEN: process.env.TRELLO_API_TOKEN || '',
+    TRELLO_URL: process.env.TRELLO_API_URL || 'https://api.trello.com/1'
+  },
   // Build Configuration: https://go.nuxtjs.dev/config-build
   build: {}
 };

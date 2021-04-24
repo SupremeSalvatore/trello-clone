@@ -48,11 +48,6 @@
               >
             </nuxt-link>
           </div>
-          <div class="d-flex">
-            <nuxt-link to="/logout">
-              <v-icon>mdi-exit-to-app</v-icon>&nbsp;&nbsp;<b>Logout</b>
-            </nuxt-link>
-          </div>
         </div>
       </v-container>
     </v-navigation-drawer>

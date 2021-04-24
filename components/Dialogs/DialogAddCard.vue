@@ -74,11 +74,6 @@ export default {
       return this.value;
     }
   },
-  created() {
-    // console.log(this.$route.params.id);
-    console.log(JSON.parse(JSON.stringify(this.$props)));
-    console.log(this.listId);
-  },
   methods: {
     async createCard() {
       const requestObj = {
@@ -87,7 +82,6 @@ export default {
         data: this.newCard
       };
       const cardData = await this.$trelloAPI.makeRequest(requestObj);
-      console.log(JSON.parse(JSON.stringify(cardData.json)));
       this.$emit('add-card', cardData.json);
       this.newCard.name = '';
       this.newCard.desc = '';

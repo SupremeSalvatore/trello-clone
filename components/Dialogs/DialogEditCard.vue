@@ -17,10 +17,10 @@
                 ></v-text-field>
               </v-col>
               <v-col cols="12" class="pa-0">
-                <v-textarea
+                <v-text-field
                   label="Edit description"
                   v-model.trim="currentCard.desc"
-                ></v-textarea>
+                ></v-text-field>
               </v-col>
             </v-row>
           </v-form>
@@ -70,9 +70,6 @@ export default {
     dialogEditCard() {
       return this.value;
     }
-  },
-  created() {
-    console.log(JSON.parse(JSON.stringify(this.currentCard)));
   },
   methods: {
     async deleteCard() {

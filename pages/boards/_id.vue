@@ -59,15 +59,16 @@
                   @keyup.enter="updateList($event, list)"
                 />
                 <v-spacer></v-spacer>
-                <v-btn
+                <!-- <v-btn
                   class="mr-1"
                   fab
                   x-small
                   color="info"
-                  @click="moveList(list, listIndex)"
+                  @click="openMoveListDialog(list, listIndex)"
                 >
                   <v-icon>mdi-folder-move</v-icon>
-                </v-btn>
+                </v-btn> -->
+
                 <v-btn
                   class="mr-1"
                   fab
@@ -114,22 +115,28 @@
             </div>
           </transition-group>
         </draggable>
+        <!--<DialogMoveList
+          v-model="moveListDialog"
+          :current-list="currentList"
+          @move-list="moveListUpdate"
+        ></DialogMoveList>-->
+        <div class="d-flex flex-row">
+          <v-btn depressed @click="listDialog = true" class="create-list"
+            >Create new list</v-btn
+          >
+          <DialogAddList
+            v-if="listDialog"
+            :board="board"
+            v-model="listDialog"
+            @add-list="(list) => board.lists.push(list)"
+          ></DialogAddList>
+        </div>
         <DialogAddCard
           v-if="dialogAddCard"
           v-model="dialogAddCard"
           @add-card="addCardToList"
           :list-id="newCardListId"
         ></DialogAddCard>
-        <div class="d-flex flex-row">
-          <v-btn depressed @click="listDialog = true" class="create-list"
-            >Create new list</v-btn
-          >
-          <DialogAddList
-            :board="board"
-            v-model="listDialog"
-            @add-list="(list) => board.lists.push(list)"
-          ></DialogAddList>
-        </div>
         <DialogEditCard
           v-if="dialogEditCard"
           v-model="dialogEditCard"
@@ -158,6 +165,8 @@ export default {
       cardDrag: false,
       newCardListId: '',
       listDialog: false,
+      moveListDialog: false,
+      currentList: {},
       dialogAddCard: false,
       dialogEditCard: false,
       currentCard: {}
@@ -187,13 +196,6 @@ export default {
     });
     return { board: { ...boardData.json, edit: false } };
   },
-  created() {
-    console.log(JSON.parse(JSON.stringify(this.board)));
-    console.log(JSON.parse(JSON.stringify(this.getBoards)));
-  },
-  updated() {
-    console.log(JSON.parse(JSON.stringify(this.newCardListId)));
-  },
   methods: {
     async inlineBoardEdit() {
       this.board.edit = !this.board.edit;
@@ -214,6 +216,15 @@ export default {
         await this.$trelloAPI.makeRequest(requestObj);
       }
       this.board.edit = false;
+    },
+    openMoveListDialog(list, listIndex) {
+      this.moveListDialog = true;
+      this.currentList = { ...list, listIndex };
+    },
+    moveListUpdate(list) {
+      if (this.board.id === list.idBoard) {
+        this.board.lists[list.listIndex] = list;
+      }
     },
     async updateList($event, list) {
       const listName = $event.target.value.trim();
