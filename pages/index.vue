@@ -1,6 +1,11 @@
 <template>
   <v-container>
-    <v-dialog v-model="dialog" max-width="355px" persistent>
+    <v-dialog
+      v-model="dialog"
+      max-width="355px"
+      persistent
+      overlay-color="white"
+    >
       <v-container class="d-block">
         <v-row no-gutters align="center" justify="space-between">
           <v-row no-gutters>
@@ -17,7 +22,7 @@
               :rules="[(v) => !!v || 'Board title is required']"
               required
               autocomplete="off"
-              v-model="board.name"
+              v-model.trim="board.name"
             ></v-text-field>
             <v-select
               v-model="board.prefs_background"
@@ -46,7 +51,13 @@
           lg="4"
         >
           <v-card
-            :color="board.prefs.background"
+            :style="
+              `background:${
+                board.prefs.backgroundColor
+                  ? `${board.prefs.background}`
+                  : `url(${board.prefs.backgroundImage}) center`
+              }`
+            "
             @click="$router.push('/boards/' + board.id)"
             class="tello-board-tile"
           >

@@ -21,7 +21,7 @@
             type="text"
             :rules="[(v) => !!v || 'Key is required']"
             required
-            v-model="auth.key"
+            v-model.trim="auth.key"
           ></v-text-field>
 
           <v-text-field
@@ -31,7 +31,7 @@
             type="token"
             :rules="[(v) => !!v || 'Token is required']"
             required
-            v-model="auth.token"
+            v-model.trim="auth.token"
           ></v-text-field>
           <v-btn
             :disabled="!formValid"

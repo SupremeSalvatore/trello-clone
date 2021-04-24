@@ -3,8 +3,8 @@
     fluid
     :style="
       board.prefs.backgroundColor
-        ? `background-color:${board.prefs.backgroundColor}`
-        : ''
+        ? `background:${board.prefs.background}`
+        : `background:url(${board.prefs.backgroundImage})`
     "
   >
     <div class="d-flex flex-column board">
@@ -121,7 +121,7 @@
                     <v-col cols="12">
                       <v-text-field
                         label="Stuff to do"
-                        v-model="newCard.name"
+                        v-model.trim="newCard.name"
                         :rules="[(v) => !!v || 'Card name is required']"
                         required
                       ></v-text-field>
@@ -129,7 +129,7 @@
                     <v-col cols="12">
                       <v-text-field
                         label="Description"
-                        v-model="newCard.desc"
+                        v-model.trim="newCard.desc"
                       ></v-text-field>
                     </v-col>
                   </v-row>
@@ -174,7 +174,7 @@
                     <v-col cols="12">
                       <v-text-field
                         label="Stuff to do"
-                        v-model="newList.name"
+                        v-model.trim="newList.name"
                         required
                       ></v-text-field>
                     </v-col>
@@ -204,14 +204,14 @@
                   <v-col cols="12">
                     <v-text-field
                       label="Edit name"
-                      v-model="currentCard.name"
+                      v-model.trim="currentCard.name"
                       required
                     ></v-text-field>
                   </v-col>
                   <v-col cols="12">
                     <v-text-field
                       label="Edit description"
-                      v-model="currentCard.desc"
+                      v-model.trim="currentCard.desc"
                       required
                     ></v-text-field>
                   </v-col>
