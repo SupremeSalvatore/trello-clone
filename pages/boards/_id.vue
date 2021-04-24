@@ -24,7 +24,6 @@
         <v-btn fab x-small color="red" @click="deleteBoard()" class="ml-4">
           <v-icon>mdi-delete-outline</v-icon>
         </v-btn>
-        <small>{{ board.description }}</small>
       </div>
 
       <div class="d-flex flex-row pr-6 pt-3">
