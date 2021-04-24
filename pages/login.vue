@@ -2,8 +2,10 @@
   <v-row align="center" justify="center">
     <v-col cols="12" sm="8" md="8" align="center">
       <v-card class="elevation-4 text-left">
-        <v-card-title class="fancy-title align-center justify-center"
-          >Trello Clone</v-card-title
+        <v-card-title class="align-center justify-center primary--text">
+          <h4 class="text-h4">
+            <span class="font-italic">Trello</span> Clone
+          </h4></v-card-title
         >
         <v-card-subtitle>
           Get your key and token on this
@@ -35,7 +37,7 @@
           ></v-text-field>
           <v-btn
             :disabled="!formValid"
-            class="login-button"
+            color="primary"
             type="submit"
             depressed
             large

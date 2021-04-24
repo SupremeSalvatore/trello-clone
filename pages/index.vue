@@ -3,7 +3,7 @@
     <DialogAddBoard v-model="dialog" />
     <div class="d-flex flex-row align-center justify-space-between mb-2">
       <h1>My Boards</h1>
-      <v-btn small depressed @click="dialog = true">
+      <v-btn color="primary" depressed @click="dialog = true">
         ADD BOARD
       </v-btn>
     </div>
@@ -71,5 +71,8 @@ export default {
 <style>
 .v-card__subtitle {
   max-width: 250px;
+}
+.tello-board-tile {
+  min-height: 90px;
 }
 </style>

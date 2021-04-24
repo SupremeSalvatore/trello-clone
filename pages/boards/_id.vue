@@ -9,13 +9,14 @@
   >
     <div class="d-flex flex-column board">
       <div class="d-flex align-center">
-        <h1 v-if="!board.edit" @click="board.edit = !board.edit">
+        <h1 v-if="!board.edit" @click="inlineBoardEdit">
           {{ board.name }}
         </h1>
         <v-text-field
           v-else
           class="mt-0 pt-0 shrink"
           type="text"
+          ref="boardName"
           :value="board.name"
           @blur="updateBoard($event)"
           @keyup.esc="updateBoard($event)"
@@ -33,6 +34,8 @@
           v-model="board.lists"
           @start="listDrag = true"
           @end="updateListPosition"
+          :options="{ animation: 200 }"
+          ghost-class="moving-card"
         >
           <transition-group class="d-flex">
             <div
@@ -87,9 +90,9 @@
                 @end="updateCardPosition"
               >
                 <v-card
-                  v-for="card in list.cards"
+                  v-for="(card, cardIndex) in list.cards"
                   class="card mb-2"
-                  @click="editCard(card)"
+                  @click="editCard(card, cardIndex)"
                   :key="card.id"
                 >
                   <v-card-text> {{ card.name }} </v-card-text>
@@ -99,8 +102,8 @@
               <v-btn
                 depressed
                 @click="
-                  dialogCard = true;
-                  newCard.idList = list.id;
+                  newCardListId = list.id;
+                  dialogAddCard = true;
                 "
                 class="create-card mt-1"
                 >Add card</v-btn
@@ -108,129 +111,30 @@
             </div>
           </transition-group>
         </draggable>
-        <v-dialog v-model="dialogCard" persistent max-width="600px">
-          <v-card elevation="0">
-            <v-card-title>
-              <span class="headline">Card name</span>
-            </v-card-title>
-            <v-card-text>
-              <v-container>
-                <v-form ref="card-form" v-model="valid">
-                  <v-row>
-                    <v-col cols="12">
-                      <v-text-field
-                        label="Stuff to do"
-                        v-model.trim="newCard.name"
-                        :rules="[(v) => !!v || 'Card name is required']"
-                        required
-                      ></v-text-field>
-                    </v-col>
-                    <v-col cols="12">
-                      <v-text-field
-                        label="Description"
-                        v-model.trim="newCard.desc"
-                      ></v-text-field>
-                    </v-col>
-                  </v-row>
-                </v-form>
-              </v-container>
-            </v-card-text>
-            <v-card-actions>
-              <v-spacer></v-spacer>
-              <v-btn
-                color="blue darken-1"
-                text
-                @click="
-                  dialogCard = false;
-                  valid = false;
-                "
-              >
-                Close
-              </v-btn>
-              <v-btn
-                :disabled="!valid"
-                color="blue darken-1"
-                text
-                @click="createCard()"
-              >
-                Save
-              </v-btn>
-            </v-card-actions>
-          </v-card>
-        </v-dialog>
+        <DialogAddCard
+          v-if="dialogAddCard"
+          v-model="dialogAddCard"
+          @add-card="addCardToList"
+          :list-id="newCardListId"
+        ></DialogAddCard>
         <div class="d-flex flex-row">
           <v-btn depressed @click="listDialog = true" class="create-list"
             >Create new list</v-btn
           >
-          <v-dialog v-model="listDialog" persistent max-width="360px">
-            <v-card elevation="0">
-              <v-card-title>
-                <span class="headline">List name</span>
-              </v-card-title>
-              <v-card-text>
-                <v-container>
-                  <v-row>
-                    <v-col cols="12">
-                      <v-text-field
-                        label="Stuff to do"
-                        v-model.trim="newList.name"
-                        required
-                      ></v-text-field>
-                    </v-col>
-                  </v-row>
-                </v-container>
-              </v-card-text>
-              <v-card-actions>
-                <v-spacer></v-spacer>
-                <v-btn color="blue darken-1" text @click="listDialog = false">
-                  Close
-                </v-btn>
-                <v-btn color="blue darken-1" text @click="createList()">
-                  Save
-                </v-btn>
-              </v-card-actions>
-            </v-card>
-          </v-dialog>
+          <DialogAddList
+            :board="board"
+            v-model="listDialog"
+            @add-list="(list) => board.lists.push(list)"
+          ></DialogAddList>
         </div>
-        <v-dialog v-model="dialogEditCard" persistent max-width="600px">
-          <v-card elevation="0">
-            <v-card-title>
-              <span class="headline">{{ currentCard.name }}</span>
-            </v-card-title>
-            <v-card-text>
-              <v-container>
-                <v-row>
-                  <v-col cols="12">
-                    <v-text-field
-                      label="Edit name"
-                      v-model.trim="currentCard.name"
-                      required
-                    ></v-text-field>
-                  </v-col>
-                  <v-col cols="12">
-                    <v-text-field
-                      label="Edit description"
-                      v-model.trim="currentCard.desc"
-                      required
-                    ></v-text-field>
-                  </v-col>
-                </v-row>
-              </v-container>
-            </v-card-text>
-            <v-card-actions>
-              <v-spacer></v-spacer>
-              <v-btn color="red darken-1" text @click="deleteCard()">
-                Delete
-              </v-btn>
-              <v-btn color="blue darken-1" text @click="dialogEditCard = false">
-                Close
-              </v-btn>
-              <v-btn color="blue darken-1" text @click="updateCard()">
-                Save
-              </v-btn>
-            </v-card-actions>
-          </v-card>
-        </v-dialog>
+        <DialogEditCard
+          v-if="dialogEditCard"
+          v-model="dialogEditCard"
+          :current-card="currentCard"
+          @delete-card="deleteCardFromList"
+          @update-card="updateCardOnList"
+        >
+        </DialogEditCard>
       </div>
     </div>
   </v-container>
@@ -248,22 +152,12 @@ export default {
   data() {
     return {
       listDrag: false,
-      newList: {
-        name: '',
-        pos: ''
-      },
-      newCard: {
-        idList: '',
-        idBoard: this.$route.params.id,
-        name: '',
-        desc: ''
-      },
-      currentCard: {},
       cardDrag: false,
+      newCardListId: '',
       listDialog: false,
-      valid: false,
-      dialogCard: false,
-      dialogEditCard: false
+      dialogAddCard: false,
+      dialogEditCard: false,
+      currentCard: {}
     };
   },
   computed: {
@@ -294,7 +188,15 @@ export default {
     console.log(JSON.parse(JSON.stringify(this.board)));
     console.log(JSON.parse(JSON.stringify(this.getBoards)));
   },
+  updated() {
+    console.log(JSON.parse(JSON.stringify(this.newCardListId)));
+  },
   methods: {
+    async inlineBoardEdit() {
+      this.board.edit = !this.board.edit;
+      await this.$nextTick();
+      this.$refs.boardName.focus();
+    },
     async updateBoard($event) {
       const boardName = $event.target.value.trim();
       if (boardName && boardName !== this.board.name) {
@@ -340,24 +242,6 @@ export default {
       this.board.lists[item.newIndex].pos = position;
       this.listDrag = false;
     },
-
-    async createList() {
-      const [lastListItem] = this.board.lists.slice(-1);
-      this.newList.pos = calculateListPos(lastListItem);
-      const requestObj = {
-        path: `boards/${this.board.id}/lists`,
-        method: 'POST',
-        data: this.newList
-      };
-      const listData = await this.$trelloAPI.makeRequest(requestObj);
-      console.log(JSON.parse(JSON.stringify(listData.json)));
-      this.board.lists.push(listData.json);
-      this.listDialog = false;
-      this.newList = {
-        name: '',
-        pos: ''
-      };
-    },
     async copyList(list, index) {
       const afterItem = this.board.lists[index + 1];
       const position = calculateListPos(list, afterItem);
@@ -384,46 +268,23 @@ export default {
       await this.$trelloAPI.makeRequest(requestObj);
       this.board.lists = this.board.lists.filter((list) => list.id !== listId);
     },
-    async createCard() {
-      const requestObj = {
-        path: `cards`,
-        method: 'POST',
-        data: this.newCard
-      };
-      const cardData = await this.$trelloAPI.makeRequest(requestObj);
+    addCardToList(cardData) {
       this.board.lists.map((list) => {
-        if (list.id === this.newCard.idList) {
-          list.cards.push(cardData.json);
+        if (list.id === this.newCardListId) {
+          list.cards.push(cardData);
         }
       });
-      this.newCard.name = '';
-      this.newCard.desc = '';
-      this.dialogCard = false;
+      this.newCardListId = '';
     },
     updateCardPosition(item) {
       console.log('update card position');
       this.cardDrag = false;
     },
-    async updateCardList(newlistId) {},
-    editCard(card) {
+    editCard(card, cardIndex) {
       this.dialogEditCard = true;
-      this.currentCard = card;
+      this.currentCard = { ...card, cardIndex };
     },
-    async updateCard() {
-      const requestObj = {
-        path: `cards/${this.currentCard.id}`,
-        method: 'PUT',
-        data: this.currentCard
-      };
-      await this.$trelloAPI.makeRequest(requestObj);
-      this.dialogEditCard = false;
-    },
-    async deleteCard() {
-      const requestObj = {
-        path: `cards/${this.currentCard.id}`,
-        method: 'DELETE'
-      };
-      await this.$trelloAPI.makeRequest(requestObj);
+    deleteCardFromList() {
       this.board.lists.map((list) => {
         if (list.id === this.currentCard.idList) {
           list.cards = list.cards.filter(
@@ -431,7 +292,14 @@ export default {
           );
         }
       });
-      this.dialogEditCard = false;
+    },
+    updateCardOnList() {
+      this.board.lists.map((list) => {
+        if (list.id === this.currentCard.idList) {
+          list.cards[this.currentCard.cardIndex] = this.currentCard;
+        }
+      });
+      this.currentCard = {};
     },
     async deleteBoard() {
       await this.$trelloAPI.makeRequest({
@@ -445,6 +313,10 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+.moving-card {
+  background: rgba(0, 0, 0, 0.3) !important;
+  transform: rotate(15deg);
+}
 .board {
   padding: 12px;
   height: 90vh;
@@ -458,7 +330,7 @@ export default {
     height: fit-content;
   }
   .v-card__text {
-    color: white;
+    color: rgba(0, 0, 0, 0.8);
     padding: 0px 8px;
   }
   .create-list {
