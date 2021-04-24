@@ -1,5 +1,5 @@
 <template>
-  <v-dialog v-model="listDialog" persistent max-width="360px">
+  <v-dialog v-model="listDialog" persistent max-width="400px">
     <v-card elevation="0">
       <v-card-title>
         <span class="headline">List name</span>
@@ -22,15 +22,10 @@
       </v-card-text>
       <v-card-actions>
         <v-spacer></v-spacer>
-        <v-btn color="blue darken-1" text @click="$emit('input', false)">
+        <v-btn color="primary" text @click="$emit('input', false)">
           Close
         </v-btn>
-        <v-btn
-          color="blue darken-1"
-          text
-          :disabled="!valid"
-          @click="createList()"
-        >
+        <v-btn color="primary" text :disabled="!valid" @click="createList()">
           Save
         </v-btn>
       </v-card-actions>
@@ -39,7 +34,7 @@
 </template>
 
 <script>
-import { calculateListPos } from '~/utils/calculatePos';
+import { calculatePos } from '~/utils/calculatePos';
 export default {
   props: {
     value: {
@@ -68,7 +63,7 @@ export default {
   methods: {
     async createList() {
       const [lastListItem] = this.board.lists.slice(-1);
-      this.newList.pos = calculateListPos(lastListItem);
+      this.newList.pos = calculatePos(lastListItem);
       const requestObj = {
         path: `boards/${this.board.id}/lists`,
         method: 'POST',

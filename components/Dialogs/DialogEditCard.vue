@@ -1,5 +1,5 @@
 <template>
-  <v-dialog v-model="dialogEditCard" persistent max-width="600px">
+  <v-dialog v-model="dialogEditCard" persistent max-width="400px">
     <v-card elevation="0">
       <v-card-title>
         <span class="headline">{{ currentCard.name }}</span>
@@ -31,13 +31,13 @@
         <v-btn color="red darken-1" text @click="deleteCard()">
           Delete
         </v-btn>
-        <v-btn color="blue darken-1" text @click="$emit('input', false)">
+        <v-btn color="primary" text @click="$emit('input', false)">
           Close
         </v-btn>
 
         <v-btn
           type="submit"
-          color="blue darken-1"
+          color="primary"
           text
           :disabled="!valid"
           @click="updateCard()"

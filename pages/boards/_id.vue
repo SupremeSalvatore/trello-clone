@@ -35,7 +35,7 @@
           @start="listDrag = true"
           @end="updateListPosition"
           :options="{ animation: 200 }"
-          ghost-class="moving-card"
+          ghost-class="moving-list"
         >
           <transition-group class="d-flex">
             <div
@@ -88,12 +88,15 @@
                 v-model="list.cards"
                 @start="cardDrag = true"
                 @end="updateCardPosition"
+                :options="{ animation: 200 }"
+                ghost-class="moving-card"
               >
                 <v-card
                   v-for="(card, cardIndex) in list.cards"
                   class="card mb-2"
                   @click="editCard(card, cardIndex)"
                   :key="card.id"
+                  :id="card.id"
                 >
                   <v-card-text> {{ card.name }} </v-card-text>
                   <v-card-text> {{ card.desc }} </v-card-text>
@@ -143,7 +146,7 @@
 <script>
 import draggable from 'vuedraggable';
 import { mapGetters } from 'vuex';
-import { calculateListPos } from '~/utils/calculatePos.js';
+import { calculatePos } from '~/utils/calculatePos.js';
 
 export default {
   components: {
@@ -230,7 +233,7 @@ export default {
     async updateListPosition(item) {
       const beforeItem = this.board.lists[item.newIndex - 1];
       const afterItem = this.board.lists[item.newIndex + 1];
-      const position = calculateListPos(beforeItem, afterItem);
+      const position = calculatePos(beforeItem, afterItem);
       const requestObj = {
         path: `lists/${item.item.id}`,
         method: 'PUT',
@@ -244,7 +247,7 @@ export default {
     },
     async copyList(list, index) {
       const afterItem = this.board.lists[index + 1];
-      const position = calculateListPos(list, afterItem);
+      const position = calculatePos(list, afterItem);
       const { id, name, idBoard } = list;
       const requestObj = {
         path: `lists`,
@@ -276,8 +279,28 @@ export default {
       });
       this.newCardListId = '';
     },
-    updateCardPosition(item) {
-      console.log('update card position');
+    async updateCardPosition(item) {
+      const toList = this.board.lists.find(
+        (list) => list.id === item.to.parentElement.id
+      );
+      const currentCard = toList.cards.find((card) => card.id === item.item.id);
+      const currentCardIndex = toList.cards.findIndex(
+        (card) => card.id === item.item.id
+      );
+      const beforeCard = toList.cards[currentCardIndex - 1];
+      const afterCard = toList.cards[currentCardIndex + 1];
+      const position = calculatePos(beforeCard, afterCard) || currentCard.pos;
+      const requestObj = {
+        path: `cards/${currentCard.id}`,
+        method: 'PUT',
+        data: {
+          idList: toList.id,
+          pos: position
+        }
+      };
+      await this.$trelloAPI.makeRequest(requestObj);
+      toList.cards[currentCardIndex].pos = position;
+      toList.cards[currentCardIndex].idList = toList.id;
       this.cardDrag = false;
     },
     editCard(card, cardIndex) {
@@ -313,9 +336,13 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.moving-card {
+.moving-list {
   background: rgba(0, 0, 0, 0.3) !important;
   transform: rotate(15deg);
+}
+.moving-card {
+  background: rgba(0, 0, 0, 0.3) !important;
+  transform: rotate(10deg);
 }
 .board {
   padding: 12px;

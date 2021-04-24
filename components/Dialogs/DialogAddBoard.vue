@@ -1,38 +1,40 @@
 <template>
-  <v-dialog v-model="dialog" max-width="355px" persistent overlay-color="white">
-    <v-container class="d-block">
-      <v-row no-gutters align="center" justify="space-between">
-        <v-row no-gutters>
-          <h3>Add Board</h3>
+  <v-dialog v-model="dialog" max-width="400px" persistent overlay-color="white">
+    <v-card elevation="0">
+      <v-container class="d-block">
+        <v-row no-gutters align="center" justify="space-between">
+          <v-row no-gutters>
+            <h3>Add Board</h3>
+          </v-row>
+          <v-icon @click="closeBoardDialog">mdi-close</v-icon>
         </v-row>
-        <v-icon @click="$emit('input', false)">mdi-close</v-icon>
-      </v-row>
-      <v-form ref="form" v-model="valid" @submit.prevent="createBoard">
-        <div class="d-flex flex-column">
-          <v-text-field
-            label="Board name"
-            name="name"
-            type="text"
-            :rules="[(v) => !!v || 'Board name is required']"
-            required
-            autocomplete="off"
-            v-model.trim="board.name"
-          ></v-text-field>
-          <v-textarea
-            label="Description"
-            v-model.trim="board.desc"
-          ></v-textarea>
-          <v-select
-            v-model="board.prefs_background"
-            :items="boardColors"
-            label="Background"
-          ></v-select>
-          <v-btn type="submit" :disabled="!valid" color="primary">
-            Submit
-          </v-btn>
-        </div>
-      </v-form>
-    </v-container>
+        <v-form ref="form" v-model="valid" @submit.prevent="createBoard">
+          <div class="d-flex flex-column">
+            <v-text-field
+              label="Board name"
+              name="name"
+              type="text"
+              :rules="[(v) => !!v || 'Board name is required']"
+              required
+              autocomplete="off"
+              v-model.trim="board.name"
+            ></v-text-field>
+            <v-textarea
+              label="Description"
+              v-model.trim="board.desc"
+            ></v-textarea>
+            <v-select
+              v-model="board.prefs_background"
+              :items="boardColors"
+              label="Background"
+            ></v-select>
+            <v-btn type="submit" :disabled="!valid" color="primary">
+              Submit
+            </v-btn>
+          </div>
+        </v-form>
+      </v-container>
+    </v-card>
   </v-dialog>
 </template>
 
@@ -71,6 +73,14 @@ export default {
   },
   methods: {
     ...mapMutations(['ADD_BOARD']),
+    closeBoardDialog() {
+      this.board = {
+        desc: '',
+        name: '',
+        prefs_background: 'orange'
+      };
+      this.$emit('input', false);
+    },
     async createBoard() {
       try {
         const requestObj = {

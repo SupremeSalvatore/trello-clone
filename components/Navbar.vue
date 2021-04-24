@@ -76,6 +76,7 @@ export default {
 <style lang="scss" scoped>
 .navbar {
   background-color: rgb(228 228 228 / 35%);
+  border-bottom: 2px solid #ccc;
 }
 .drawer1 {
   transform: none !important;
@@ -90,7 +91,6 @@ a {
   text-decoration: none;
 }
 .menu-items a {
-  // color: $text-color;
   padding: 10px 0px 10px 3px;
   font-size: 24px;
 }

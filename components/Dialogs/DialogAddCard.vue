@@ -1,5 +1,5 @@
 <template>
-  <v-dialog v-model="dialogCard" persistent max-width="450px">
+  <v-dialog v-model="dialogCard" persistent max-width="400px">
     <v-card elevation="0">
       <v-card-title>
         <span class="headline">Card name</span>
@@ -29,7 +29,7 @@
       <v-card-actions>
         <v-spacer></v-spacer>
         <v-btn
-          color="blue darken-1"
+          color="primary"
           text
           @click="
             $emit('input', false);
@@ -38,12 +38,7 @@
         >
           Close
         </v-btn>
-        <v-btn
-          :disabled="!valid"
-          color="blue darken-1"
-          text
-          @click="createCard()"
-        >
+        <v-btn :disabled="!valid" color="primary" text @click="createCard()">
           Save
         </v-btn>
       </v-card-actions>
