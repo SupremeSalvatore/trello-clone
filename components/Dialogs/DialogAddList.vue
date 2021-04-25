@@ -71,7 +71,7 @@ export default {
       };
       const listData = await this.$trelloAPI.makeRequest(requestObj);
       this.$emit('input', false);
-      this.$emit('add-list', { ...listData.json, cards: [] });
+      this.$emit('add-list', { ...listData.json, cards: [], edit: false });
       this.newList = {
         name: '',
         pos: ''

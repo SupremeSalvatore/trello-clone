@@ -35,10 +35,6 @@ export default ({ $config, env }, inject) => {
         }
       };
       if (method === 'PUT') {
-        requestSettings.headers = {
-          'Content-Type': 'application/x-www-form-urlencoded'
-        };
-        // requestSettings.body = JSON.stringify(data);
         requestSettings.body = new URLSearchParams(data);
       } else if (method === 'POST') {
         requestSettings.headers = {

@@ -56,7 +56,6 @@ export default {
         'purple',
         'pink',
         'lime',
-        'sky',
         'grey'
       ],
       board: {

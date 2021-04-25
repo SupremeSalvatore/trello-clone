@@ -100,7 +100,18 @@
                   :id="card.id"
                 >
                   <v-card-text> {{ card.name }} </v-card-text>
-                  <v-card-text> {{ card.desc }} </v-card-text>
+                  <v-card-text>
+                    <v-icon small v-if="card.desc">mdi-text</v-icon>
+                    <v-icon
+                      small
+                      v-if="
+                        board.actions.some(
+                          (action) => action.data.card.id === card.id
+                        )
+                      "
+                      >mdi-comment</v-icon
+                    >
+                  </v-card-text>
                 </v-card>
               </draggable>
               <v-btn
@@ -180,10 +191,13 @@ export default {
       path: `boards/${params.id}`,
       params: {
         lists: 'open',
-        cards: 'all'
+        cards: 'all',
+        actions: 'commentCard',
+        member_fields: 'fullName,username'
       }
     };
     const boardData = await $trelloAPI.makeRequest(requestObj);
+    console.log(JSON.parse(JSON.stringify(boardData.json)));
     boardData.json.lists = boardData.json.lists.map((list) => {
       list.edit = false;
       list.cards = boardData.json.cards.reduce((accCardArr, card) => {
