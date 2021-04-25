@@ -29,7 +29,10 @@ export default ({ $config, env }, inject) => {
   async function makeRequest({ path, params = {}, method = 'GET', data }) {
     try {
       const requestSettings = {
-        method
+        method,
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded'
+        }
       };
       if (method === 'PUT') {
         requestSettings.headers = {
